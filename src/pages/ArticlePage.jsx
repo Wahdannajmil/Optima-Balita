@@ -56,7 +56,7 @@ const ArticlePage = () => {
                       <img
                         src={article.image}
                         alt={`article pilihan ${article.id}`}
-                        className="rounded-lg"
+                        className="rounded-lg transition-transform duration-300 transform hover:scale-105"
                       />
                       <h2 className="absolute bottom-0 rounded-b-lg bg-gradient-to-t from-black bg-opacity-40 left-0 w-full px-4 py-4 text-white text-lg font-semibold sm:text-2xl">
                         {article.title}
@@ -76,7 +76,7 @@ const ArticlePage = () => {
                       <img
                         src={article.image}
                         alt={`article pilihan ${article.id}`}
-                        className="max-w-lg w-36 rounded-lg"
+                        className="max-w-lg w-36 rounded-lg transition-transform duration-300 transform hover:scale-105"
                       />
                       <div>
                         <h2 className="text-lg font-medium">{article.title}</h2>
@@ -102,13 +102,13 @@ const ArticlePage = () => {
           {randomArticles?.data?.map((article) => (
             <div
               key={article.id}
-              className="max-w-md border-slate-300 border-2 rounded-lg gap-3 shadow-lg"
+              className="max-w-md border-slate-300 border-2 rounded-lg gap-3 shadow-lg hover:shadow-xl transition duration-300"
             >
               <Link to={`/article/${article.id}`}>
                 <img
                   src={article.image}
                   alt={`article terbaru ${article.id}`}
-                  className="rounded-t-md"
+                  className="rounded-t-md transition-transform duration-300 transform hover:scale-105"
                 />
                 <div className="m-2">
                   <h2 className="text-lg font-medium line-clamp-3">
@@ -130,3 +130,4 @@ const ArticlePage = () => {
 };
 
 export default ArticlePage;
+

@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { FaBook, FaCalculator, FaComments } from "react-icons/fa";
+import BgHero from "../../assets/img/bg_hero.jpg";
 
 const HeroBanner = () => {
   return (
@@ -9,8 +10,7 @@ const HeroBanner = () => {
           <div
             className="absolute top-0 w-full h-full bg-center bg-cover"
             style={{
-              backgroundImage:
-                "url('https://i.postimg.cc/d0bQ4GGW/bg-hero.jpg')",
+              backgroundImage: `url(${BgHero})`,
             }}
           >
             <span

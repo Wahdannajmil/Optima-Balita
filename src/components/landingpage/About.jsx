@@ -1,18 +1,33 @@
+import { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import { FaArrowRight } from "react-icons/fa";
+
 const About = () => {
+  useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      once: true,
+    });
+  }, []);
+
   return (
     <>
       <section className="bg-white py-5" id="about">
         <div className="container py-lg-5">
-          <div className="flex flex-col md:flex-row justify-center items-center mb-5">
+          <div
+            className="flex flex-col md:flex-row justify-center items-center mb-5"
+            data-aos="fade-up"
+          >
             <div className="md:w-1/2 mb-4 md:mb-0">
               <img
                 src="https://i.postimg.cc/66HgKtmK/tentang-kami.jpg"
-                className="w-3/4 md:w-100 rounded-lg md:justify-center mx-auto"
+                className="w-3/4 md:w-100 rounded-lg md:justify-center mx-auto hover:shadow-lg transition-shadow"
                 alt="about image"
               />
             </div>
             <div className="md:w-1/2 p-4">
-              <div data-aos="fade-up">
+              <div>
                 <h4 className="font-bold mb-3 text-2xl sm:text-3xl">
                   Tentang Optima Balita
                 </h4>

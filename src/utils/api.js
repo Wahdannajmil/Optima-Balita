@@ -192,7 +192,7 @@ export const postDiscussion = async (discussion, currentUser, setForumData) => {
       error: false,
     }));
 
-    return response.data; // Mengembalikan data diskusi yang baru ditambahkan
+    return response.data;
   } catch (error) {
     console.error("Failed to post discussion:", error.message);
     if (error.response) {
@@ -315,6 +315,7 @@ export const handleLikeDiscussion = async (discussionId, setLikesData) => {
       },
     );
     const updatedDiscussionFromAPI = response.data;
+
     setLikesData(updatedDiscussionFromAPI);
   } catch (error) {
     console.error("Failed to like discussion:", error.message);
@@ -335,6 +336,7 @@ export const handleUnlikeDiscussion = async (discussionId, setLikesData) => {
       },
     );
     const updatedDiscussionFromAPI = response.data;
+
     setLikesData(updatedDiscussionFromAPI);
   } catch (error) {
     console.error("Failed to unlike discussion:", error.message);
@@ -358,7 +360,6 @@ export const deleteDiscussion = async (discussionId) => {
 export const handleDeleteDiscussion = async (discussionId, setForumData) => {
   try {
     await deleteDiscussion(discussionId);
-    // Remove the discussion from state
     setForumData((prevData) => ({
       data: Array.isArray(prevData?.data)
         ? {
@@ -368,6 +369,11 @@ export const handleDeleteDiscussion = async (discussionId, setForumData) => {
           }
         : { data: [] },
     }));
+    const token = localStorage.getItem("token");
+    if (token) {
+      const forumResponse = await fetchForum(token);
+      setForumData(forumResponse);
+    }
   } catch (error) {
     console.error("Failed to delete discussion:", error.message);
   }
@@ -397,7 +403,6 @@ export const handleDeleteComment = async (
 ) => {
   try {
     await deleteComment(discussionId, commentId);
-    // Remove the comment from the state
     setForumData((prevData) => ({
       data: Array.isArray(prevData?.data)
         ? {

@@ -1,0 +1,39 @@
+/* Add styling for the cards */
+.consultant-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb; /* Light gray border */
+  transition: transform 0.5s ease-out, box-shadow 0.5s ease-out; /* Added box-shadow transition */
+}
+
+.consultant-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Added box-shadow on hover */
+}
+
+/* Add styling for the text content */
+.consultant-card .text-content {
+  padding: 16px;
+}
+
+.consultant-card h1 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.consultant-card p {
+  font-size: 0.875rem;
+  color: #4b5563; /* Gray text color */
+}
+
+/* Add styling for the form container */
+.form-container {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+}
+
+.consultant-card:hover .form-container {
+  opacity: 1;
+  visibility: visible;
+}
