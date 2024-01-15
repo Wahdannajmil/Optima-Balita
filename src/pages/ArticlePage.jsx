@@ -53,14 +53,16 @@ const ArticlePage = () => {
                 <div className="max-w-3xl space-y-4">
                   <div className="relative">
                     <Link to={`/article/${article.id}`}>
-                      <img
-                        src={article.image}
-                        alt={`article pilihan ${article.id}`}
-                        className="rounded-lg transition-transform duration-300 transform hover:scale-105"
-                      />
-                      <h2 className="absolute bottom-0 rounded-b-lg bg-gradient-to-t from-black bg-opacity-40 left-0 w-full px-4 py-4 text-white text-lg font-semibold sm:text-2xl">
-                        {article.title}
-                      </h2>
+                      <div className="hover-card">
+                        <img
+                          src={article.image}
+                          alt={`article pilihan ${article.id}`}
+                          className="rounded-lg transition-transform duration-300 transform hover:scale-105"
+                        />
+                        <h2 className="absolute bottom-0 rounded-b-lg bg-gradient-to-t from-black bg-opacity-40 left-0 w-full px-4 py-4 text-white text-lg font-semibold sm:text-2xl">
+                          {article.title}
+                        </h2>
+                      </div>
                     </Link>
                   </div>
                 </div>
@@ -72,7 +74,7 @@ const ArticlePage = () => {
               {articles.data.map((article) => (
                 <div key={article.id} className="mb-4">
                   <Link to={`/article/${article.id}`}>
-                    <div className="max-w-xl flex gap-3">
+                    <div className="max-w-xl flex gap-3 hover-card">
                       <img
                         src={article.image}
                         alt={`article pilihan ${article.id}`}

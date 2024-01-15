@@ -16,9 +16,11 @@ import {
   handleLikeDiscussion,
   handleUnlikeDiscussion,
   handleUpdateComment,
-  handleDeleteComment, // Tambahkan ini
-  handleDeleteDiscussion, // Tambahkan ini
+  handleDeleteComment,
+  handleDeleteDiscussion,
 } from "../utils/api";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faStethoscope } from "@fortawesome/free-solid-svg-icons";
 
 function DetailDiskusi() {
   const { id } = useParams();
@@ -53,11 +55,9 @@ function DetailDiskusi() {
 
   const handleSubmitComment = () => {
     if (editingCommentId) {
-      // Mengedit komentar
       handleUpdateComment(id, editingCommentId, { text: newComment });
       setEditingCommentId(null);
     } else {
-      // Menambahkan komentar baru
       handlePostComment(id, newComment);
     }
     setNewComment("");
@@ -65,18 +65,14 @@ function DetailDiskusi() {
 
   const handleDelete = () => {
     if (deletingCommentId) {
-      // Menghapus komentar
       handleDeleteComment(id, deletingCommentId);
       setDeletingCommentId(null);
     } else {
-      // Menghapus diskusi
-      // Implement a confirmation dialog if needed
       handleDeleteDiscussion(id, setForumData);
     }
   };
 
   const handleEdit = () => {
-    // Implement navigation to the edit page or a modal for editing
     console.log("Editing discussion:", discussion);
   };
 
@@ -121,6 +117,12 @@ function DetailDiskusi() {
                   <div>
                     <p className="font-semibold text-lg">
                       {discussion?.poster_username}
+                      {discussion?.poster_role === "DOCTOR" && (
+                        <span className="ml-2 text-blue-500">
+                          <FontAwesomeIcon icon={faStethoscope} />
+                          Ahli gizi
+                        </span>
+                      )}
                     </p>
                     <span className="text-sm text-slate-600">
                       {dayjs(discussion?.created_at).fromNow()}
@@ -135,14 +137,14 @@ function DetailDiskusi() {
                 <div className="flex gap-4">
                   <button
                     onClick={handleLike}
-                    className="text-teal-500 hover:underline mr-2"
+                    className="bg-gray-300 py-1 px-4 rounded-full flex items-center gap-1 text-white"
                   >
-                    <BiLike /> Like (
-                    {discussion?.likes ? discussion.likes.length : 0})
+                    <BiLike />
+                    {discussion?.like_count}
                   </button>
                   <button
                     onClick={handleSubmitComment}
-                    className="text-red-500 hover:underline"
+                    className="bg-gray-300 py-1 px-4 rounded-full flex items-center gap-1 text-white"
                   >
                     <BiComment />{" "}
                     {forumData.comments && forumData.comments.length > 0
@@ -213,7 +215,6 @@ function DetailDiskusi() {
                 </div>
                 <div className="mt-4">
                   {editingCommentId ? (
-                    // Form untuk mengedit komentar
                     <CommentForm
                       onSubmit={handleSubmitComment}
                       value={newComment}

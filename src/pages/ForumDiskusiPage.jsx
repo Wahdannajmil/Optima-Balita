@@ -17,6 +17,8 @@ import Footer from "../components/Footer";
 import { BiComment, BiLike } from "react-icons/bi";
 import { Link } from "react-router-dom";
 import Loader from "../components/Loader";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faStethoscope } from "@fortawesome/free-solid-svg-icons";
 
 const ForumDiskusiPage = () => {
   const { isLoading, forumData, setForumData } = useContext(ForumContext);
@@ -50,7 +52,7 @@ const ForumDiskusiPage = () => {
     };
 
     fetchData();
-  }, [setForumData]);
+  }, [forumData, setForumData]);
 
   const handlePostDiscussion = async (e) => {
     e.preventDefault();
@@ -136,15 +138,21 @@ const ForumDiskusiPage = () => {
       );
 
       if (updatedDiscussion && updatedDiscussion.likes) {
-        const updatedForumData = {
-          ...forumData,
-          data: forumData.data.map((discussion) =>
-            discussion.id === discussionId
-              ? { ...discussion, likes: updatedDiscussion.likes }
-              : discussion,
-          ),
-        };
-        setForumData(updatedForumData);
+        setForumData((prevForumData) => {
+          const updatedForumData = {
+            ...prevForumData,
+            data: prevForumData.data.map((discussion) =>
+              discussion.id === discussionId
+                ? {
+                    ...discussion,
+                    likes: updatedDiscussion.likes,
+                    like_count: updatedDiscussion.likes.length,
+                  }
+                : discussion,
+            ),
+          };
+          return updatedForumData;
+        });
       }
     } catch (error) {
       console.error("Failed to like discussion:", error.message);
@@ -154,25 +162,28 @@ const ForumDiskusiPage = () => {
   const handleUnlike = async (discussionId) => {
     try {
       await handleUnlikeDiscussion(discussionId, setForumData);
-      const updatedForumData = {
-        ...forumData,
-        data: forumData.data.map((discussion) =>
-          discussion.id === discussionId
-            ? {
-                ...discussion,
-                likes: discussion.likes.filter(
-                  (userId) => userId !== currentUser.userId,
-                ),
-              }
-            : discussion,
-        ),
-      };
-      setForumData(updatedForumData);
+
+      setForumData((prevForumData) => {
+        const updatedForumData = {
+          ...prevForumData,
+          data: prevForumData.data.map((discussion) =>
+            discussion.id === discussionId
+              ? {
+                  ...discussion,
+                  likes: discussion.likes.filter(
+                    (userId) => userId !== currentUser.userId,
+                  ),
+                  like_count: discussion.like_count - 1,
+                }
+              : discussion,
+          ),
+        };
+        return updatedForumData;
+      });
     } catch (error) {
       console.error("Failed to unlike discussion:", error.message);
     }
   };
-
   if (
     isLoading ||
     forumData.isLoading ||
@@ -181,6 +192,10 @@ const ForumDiskusiPage = () => {
   ) {
     return <Loader />;
   }
+
+  const isDiscussionLiked = (discussion) => {
+    return discussion.likes && discussion.likes.includes(currentUser.userId);
+  };
 
   return (
     <>
@@ -251,7 +266,14 @@ const ForumDiskusiPage = () => {
                         <div>
                           <p className="font-semibold text-lg">
                             {discussion.poster_username}
+                            {discussion.poster_role === "DOCTOR" && (
+                              <span className="ml-2 text-blue-500">
+                                <FontAwesomeIcon icon={faStethoscope} />
+                                Ahli gizi
+                              </span>
+                            )}
                           </p>
+
                           <p className="text-sm text-slate-600">
                             {dayjs(discussion.created_at).fromNow()}
                           </p>
@@ -267,14 +289,13 @@ const ForumDiskusiPage = () => {
                         <button
                           onClick={() => handleLike(discussion.id)}
                           className={`${
-                            discussion.likes &&
-                            discussion.likes.includes(currentUser.userId)
+                            isDiscussionLiked(discussion)
                               ? "bg-blue-500"
                               : "bg-gray-300"
                           } py-1 px-4 rounded-full flex items-center gap-1 text-white`}
                         >
                           <BiLike />
-                          {discussion.likes ? discussion.likes.length : 0}
+                          {discussion.like_count}
                         </button>
                         <Link
                           to={`/forum/${discussion.id}`}

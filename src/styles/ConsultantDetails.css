@@ -1,16 +1,14 @@
-/* Add styling for the cards */
 .consultant-card {
   background-color: #ffffff;
-  border: 1px solid #e5e7eb; /* Light gray border */
-  transition: transform 0.5s ease-out, box-shadow 0.5s ease-out; /* Added box-shadow transition */
+  border: 1px solid #e5e7eb; 
+  transition: transform 0.5s ease-out, box-shadow 0.5s ease-out;
 }
 
 .consultant-card:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Added box-shadow on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
 }
 
-/* Add styling for the text content */
 .consultant-card .text-content {
   padding: 16px;
 }
@@ -23,10 +21,9 @@
 
 .consultant-card p {
   font-size: 0.875rem;
-  color: #4b5563; /* Gray text color */
+  color: #4b5563;
 }
 
-/* Add styling for the form container */
 .form-container {
   opacity: 0;
   visibility: hidden;

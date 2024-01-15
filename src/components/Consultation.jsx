@@ -64,7 +64,7 @@ const ConsultantDetails = () => {
   }, []);
 
   return (
-    <div className="bg-white py-16 mx-auto">
+    <div className="bg-white py-16 mx-auto pb-96">
       <div className="container px-16 mb-8 text-center">
         <h2 className="text-2xl font-semibold mb-4 text-teal-500">
           Silahkan melakukan konsultasi melalui WhatsApp
