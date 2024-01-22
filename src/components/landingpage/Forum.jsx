@@ -1,38 +1,35 @@
-import { useContext, useEffect, useState } from "react";
-import { FaStar, FaStarHalfAlt } from "react-icons/fa";
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { ForumContext } from "../../contexts/ForumContext";
-import { fetchForum } from "../../utils/api";
+import { fetchLandingPageForum } from "../../utils/api";
+import { BiComment } from "react-icons/bi";
+import { AiOutlineLike } from "react-icons/ai";
 
 const Forum = () => {
-  const { forumData, loading, setForumData } = useContext(ForumContext);
+  const [landingForumData, setLandingForumData] = useState({ data: [] });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
+      console.log("here");
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          console.error("Token not found in local storage");
-          return;
-        }
-
-        const forumResponse = await fetchForum(token);
-        console.log("Forum Response:", forumResponse);
-        setForumData(forumResponse);
+        const forumResponse = await fetchLandingPageForum();
+        setLandingForumData(forumResponse);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching forum data:", error.message);
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, [setForumData]);
+  }, [setLandingForumData]);
 
   if (loading) {
     return <p>Loading...</p>;
   }
 
-  const limitedForumData = Array.isArray(forumData?.data)
-    ? forumData.data.slice(0, 3)
+  const limitedForumData = Array.isArray(landingForumData?.data)
+    ? landingForumData.data.slice(0, 3)
     : [];
 
   return (
@@ -54,7 +51,7 @@ const Forum = () => {
             key={discussion.id}
             className="w-full mb-4 md:w-1/3 md:ml-2 md:mr-2 lg:w-1/3"
           >
-            <div className="box-lg bg-white m-2 p-2 md:m-4 md:p-4 w-auto text-center relative border-2 border-slate-400 shadow-md rounded-xl">
+            <div className="box-lg bg-white m-2 p-2 md:m-4 md:p-4 w-auto text-center relative border-2 border-slate-400 shadow-md rounded-xl hover:shadow-xl transition duration-300">
               <div className="user flex-col">
                 <img
                   src={discussion.poster_profile}
@@ -66,13 +63,24 @@ const Forum = () => {
                 </h3>
               </div>
               <div className="text-center">{discussion.post_content}</div>
+              {/* show likes and comment count */}
+              <div className="flex justify-center mt-2">
+                <div className="flex items-center mr-5">
+                  <AiOutlineLike className="mr-1 text-teal-500" />
+                  <p className="text-teal-500">{discussion.like_count}</p>
+                </div>
+                <div className="flex items-center">
+                  <BiComment className="mr-1 text-teal-500" />
+                  <p className="text-teal-500">{discussion.comment_count}</p>
+                </div>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
       <div className="flex justify-center">
-        <button className="py-3 px-5 text-lg bg-gradient-to-r from-teal-600 to-teal-300 rounded-full font-semibold text-white">
+        <button className="py-3 px-5 text-lg bg-gradient-to-r from-teal-600 to-teal-300 rounded-full font-semibold text-white hover:shadow-xl transition duration-300">
           <NavLink to="/forum">Bergabung</NavLink>
         </button>
       </div>

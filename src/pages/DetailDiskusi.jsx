@@ -1,9 +1,9 @@
-import React, { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect } from "react";
 import { ForumContext } from "../contexts/ForumContext";
-import { BiComment, BiLike } from "react-icons/bi";
+import { BiComment } from "react-icons/bi";
 import CommentForm from "../components/CommentForm";
 import { useParams } from "react-router-dom";
-import { AiOutlineWechat } from "react-icons/ai";
+import { AiOutlineWechat, AiFillLike, AiOutlineLike } from "react-icons/ai";
 import { BsChevronLeft } from "react-icons/bs";
 import { IoShareSocialOutline } from "react-icons/io5";
 import Navbar from "../components/Navbar";
@@ -11,32 +11,62 @@ import Footer from "../components/Footer";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { faStethoscope } from "@fortawesome/free-solid-svg-icons";
 import {
   handlePostComment,
-  handleLikeDiscussion,
-  handleUnlikeDiscussion,
+  handleLikeUnlikeDiscussion,
   handleUpdateComment,
   handleDeleteComment,
-  handleDeleteDiscussion,
+  fetchForum,
 } from "../utils/api";
+import { jwtDecode } from "jwt-decode";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStethoscope } from "@fortawesome/free-solid-svg-icons";
 
 function DetailDiskusi() {
   const { id } = useParams();
   const [newComment, setNewComment] = useState("");
   const [discussion, setDiscussion] = useState(null);
   const [editingCommentId, setEditingCommentId] = useState(null);
-  const [deletingCommentId, setDeletingCommentId] = useState(null);
 
-  const { isLoading, forumData } = useContext(ForumContext);
+  const { isLoading, forumData, setForumData } = useContext(ForumContext);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const forumResponse = await fetchForum();
+        setForumData(forumResponse);
+        isLoading(false);
+      } catch (error) {
+        console.error("Error fetching forum data:", error.message);
+        isLoading(false);
+      }
+    };
+
     if (forumData) {
       const foundDiscussion = forumData.data.find((item) => item.id === id);
-      setDiscussion(foundDiscussion);
+
+      if (foundDiscussion && foundDiscussion.comments) {
+        setDiscussion(foundDiscussion);
+      } else {
+        fetchData();
+      }
     }
-  }, [forumData, id]);
+  }, [forumData, id, isLoading, setForumData]);
+
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
+
+  const token = JSON.parse(localStorage.getItem("token"));
+  if (!token) {
+    window.location.href = "/login";
+  }
+
+  const { accessToken } = token;
+
+  const decodedToken = jwtDecode(accessToken);
+  const userId = decodedToken.user_id;
+
   const goBack = () => {
     window.history.back();
   };
@@ -50,30 +80,27 @@ function DetailDiskusi() {
   };
 
   const handleLike = () => {
-    handleLikeDiscussion(id);
+    handleLikeUnlikeDiscussion(id, setForumData);
   };
 
-  const handleSubmitComment = () => {
+  const handleSubmitComment = async () => {
     if (editingCommentId) {
-      handleUpdateComment(id, editingCommentId, { text: newComment });
+      await handleUpdateComment(editingCommentId, newComment, setForumData);
       setEditingCommentId(null);
     } else {
-      handlePostComment(id, newComment);
+      await handlePostComment(id, newComment, setForumData);
     }
     setNewComment("");
   };
 
-  const handleDelete = () => {
-    if (deletingCommentId) {
-      handleDeleteComment(id, deletingCommentId);
-      setDeletingCommentId(null);
-    } else {
-      handleDeleteDiscussion(id, setForumData);
-    }
+  const handleDelete = async (commentId) => {
+    await handleDeleteComment(commentId, setForumData);
   };
 
-  const handleEdit = () => {
-    console.log("Editing discussion:", discussion);
+  const handleEdit = (commentId) => {
+    const comment = discussion.comments.find((item) => item.id === commentId);
+    setEditingCommentId(commentId);
+    setNewComment(comment.comment_content);
   };
 
   dayjs.extend(relativeTime);
@@ -116,7 +143,7 @@ function DetailDiskusi() {
                   />
                   <div>
                     <p className="font-semibold text-lg">
-                      {discussion?.poster_username}
+                      {discussion?.poster_username}{" "}
                       {discussion?.poster_role === "DOCTOR" && (
                         <span className="ml-2 text-blue-500">
                           <FontAwesomeIcon icon={faStethoscope} />
@@ -137,61 +164,63 @@ function DetailDiskusi() {
                 <div className="flex gap-4">
                   <button
                     onClick={handleLike}
-                    className="bg-gray-300 py-1 px-4 rounded-full flex items-center gap-1 text-white"
+                    className="text-teal-500 hover:underline mr-2"
                   >
-                    <BiLike />
-                    {discussion?.like_count}
+                    {discussion?.is_liked ? (
+                      <AiFillLike className="text-teal-500 w-5 h-5" />
+                    ) : (
+                      <AiOutlineLike className="w-5 h-5" />
+                    )}
+                    Like ({discussion?.like_count})
                   </button>
-                  <button
-                    onClick={handleSubmitComment}
-                    className="bg-gray-300 py-1 px-4 rounded-full flex items-center gap-1 text-white"
-                  >
-                    <BiComment />{" "}
-                    {forumData.comments && forumData.comments.length > 0
-                      ? forumData.comments.length
-                      : ""}
+                  <button className="text-red-500 hover:underline">
+                    <BiComment className="w-5 h-5" />{" "}
+                    {discussion?.comment_count}
                   </button>
                 </div>
-
                 <div>
-                  {forumData.comments && forumData.comments.length > 0 ? (
+                  {discussion?.comment_count > 0 ? (
                     <ul className="space-y-4">
                       <h2 className="font-medium text-md">
-                        Semua komentar({forumData.comments.length})
+                        Semua komentar ({discussion.comment_count})
                       </h2>
-                      {forumData.comments.map((comment) => (
+                      {discussion?.comments?.map((comment) => (
                         <li
                           key={comment.id}
                           className="border-t border-slate-200 pt-4"
                         >
                           <div className="flex gap-4 items-center">
                             <img
-                              src={comment.userProfile}
+                              src={comment.commenter_profile}
                               alt={`user profile ${comment.id}`}
                               className="rounded-full w-12"
                             />
                             <div>
                               <p className="font-semibold text-md">
-                                {comment.username}
+                                {comment.commenter_username}{" "}
+                                {comment.commenter_role === "DOCTOR" && (
+                                  <span className="ml-2 text-blue-500">
+                                    <FontAwesomeIcon icon={faStethoscope} />
+                                    Ahli gizi
+                                  </span>
+                                )}
                               </p>
                               <span className="text-sm text-slate-600">
-                                {dayjs(comment.createdAt).fromNow()}
+                                {dayjs(comment.created_at).fromNow()}
                               </span>
-                              <p className="text-lg">{comment.text}</p>
-                              {comment.userId === token.userId && (
+                              <p className="text-lg">
+                                {comment.comment_content}
+                              </p>
+                              {comment.commenter_id === userId && (
                                 <div className="flex gap-2">
                                   <button
-                                    onClick={() =>
-                                      setEditingCommentId(comment.id)
-                                    }
+                                    onClick={() => handleEdit(comment.id)}
                                     className="text-blue-500 hover:underline"
                                   >
                                     Edit
                                   </button>
                                   <button
-                                    onClick={() =>
-                                      setDeletingCommentId(comment.id)
-                                    }
+                                    onClick={() => handleDelete(comment.id)}
                                     className="text-red-500 hover:underline"
                                   >
                                     Delete
@@ -214,19 +243,14 @@ function DetailDiskusi() {
                   )}
                 </div>
                 <div className="mt-4">
-                  {editingCommentId ? (
-                    <CommentForm
-                      onSubmit={handleSubmitComment}
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                    />
-                  ) : (
-                    <CommentForm
-                      onSubmit={handleSubmitComment}
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                    />
-                  )}
+                  <CommentForm
+                    onSubmit={handleSubmitComment}
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    editingCommentId={editingCommentId}
+                    setEditingCommentId={setEditingCommentId}
+                    setNewComment={setNewComment}
+                  />
                 </div>
               </div>
             </div>

@@ -169,6 +169,16 @@ export const fetchForum = async (token) => {
   }
 };
 
+export const fetchLandingPageForum = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}/landing`);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch forum discussions:", error);
+  }
+};
+
 export const postDiscussion = async (discussion, currentUser, setForumData) => {
   try {
     const token = JSON.parse(localStorage.getItem("token"));
@@ -204,16 +214,9 @@ export const postDiscussion = async (discussion, currentUser, setForumData) => {
 
 export const postComment = async (discussionId, comment) => {
   try {
-    const token = JSON.parse(localStorage.getItem("token"));
     const response = await axios.post(
       `${BASE_URL}/${discussionId}/comment`,
       comment,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      },
     );
     return response.data;
   } catch (error) {
@@ -257,89 +260,29 @@ export const handleUpdateDiscussion = async (
   }
 };
 
-export const handleUpdateComment = async (
-  discussionId,
-  commentId,
-  updatedComment,
-) => {
+export const handleUpdateComment = async (commentId, updatedComment, setForumData) => {
   try {
-    const response = await axios.put(
-      `${BASE_URL}/${discussionId}/comment/${commentId}`,
-      updatedComment,
-      {
-        headers: {
-          Authorization: `Bearer ${
-            JSON.parse(localStorage.getItem("token")).accessToken
-          }`,
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    await axios.put(`${BASE_URL}/comment/${commentId}`, {
+      comment_content: updatedComment,
+    });
 
-    const updatedCommentFromAPI = response.data;
-
-    setForumData((prevData) => ({
-      data: Array.isArray(prevData?.data)
-        ? {
-            data: prevData.data.map((discussion) =>
-              discussion.id === discussionId
-                ? {
-                    ...discussion,
-                    comments: discussion.comments.map((comment) =>
-                      comment.id === commentId
-                        ? updatedCommentFromAPI
-                        : comment,
-                    ),
-                  }
-                : discussion,
-            ),
-          }
-        : { data: [] },
-    }));
+    const forumResponse = await fetchForum();
+    setForumData(forumResponse);
   } catch (error) {
     console.error("Failed to update comment:", error.message);
   }
 };
 
-export const handleLikeDiscussion = async (discussionId, setLikesData) => {
+export const handleLikeUnlikeDiscussion = async (
+  discussionId,
+  setForumData,
+) => {
   try {
-    const response = await axios.post(
-      `${BASE_URL}/${discussionId}/like`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${
-            JSON.parse(localStorage.getItem("token")).accessToken
-          }`,
-        },
-      },
-    );
-    const updatedDiscussionFromAPI = response.data;
-
-    setLikesData(updatedDiscussionFromAPI);
+    await axios.post(`${BASE_URL}/${discussionId}/like`);
+    const forumResponse = await fetchForum();
+    setForumData(forumResponse);
   } catch (error) {
     console.error("Failed to like discussion:", error.message);
-  }
-};
-
-export const handleUnlikeDiscussion = async (discussionId, setLikesData) => {
-  try {
-    const response = await axios.post(
-      `${BASE_URL}/${discussionId}/unlike`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${
-            JSON.parse(localStorage.getItem("token")).accessToken
-          }`,
-        },
-      },
-    );
-    const updatedDiscussionFromAPI = response.data;
-
-    setLikesData(updatedDiscussionFromAPI);
-  } catch (error) {
-    console.error("Failed to unlike discussion:", error.message);
   }
 };
 
@@ -378,49 +321,20 @@ export const handleDeleteDiscussion = async (discussionId, setForumData) => {
     console.error("Failed to delete discussion:", error.message);
   }
 };
-
-export const deleteComment = async (discussionId, commentId) => {
+export const deleteComment = async (commentId) => {
   try {
-    const token = JSON.parse(localStorage.getItem("token"));
-    const response = await axios.delete(
-      `${BASE_URL}/${discussionId}/comment/${commentId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token.accessToken}`,
-        },
-      },
-    );
+    const response = await axios.delete(`${BASE_URL}/comment/${commentId}`);
     return response.data;
   } catch (error) {
     throw new Error("Failed to delete comment");
   }
 };
 
-export const handleDeleteComment = async (
-  discussionId,
-  commentId,
-  setForumData,
-) => {
+export const handleDeleteComment = async (commentId, setForumData) => {
   try {
-    await deleteComment(discussionId, commentId);
-    setForumData((prevData) => ({
-      data: Array.isArray(prevData?.data)
-        ? {
-            data: prevData.data.map((discussion) => {
-              if (discussion.id === discussionId) {
-                return {
-                  ...discussion,
-                  comments: discussion.comments.filter(
-                    (comment) => comment.id !== commentId,
-                  ),
-                };
-              } else {
-                return discussion;
-              }
-            }),
-          }
-        : { data: [] },
-    }));
+    await deleteComment(commentId);
+    const forumResponse = await fetchForum();
+    setForumData(forumResponse);
   } catch (error) {
     console.error("Failed to delete comment:", error.message);
   }
@@ -432,37 +346,14 @@ export const handlePostComment = async (
   setForumData,
 ) => {
   try {
-    const token = JSON.parse(localStorage.getItem("token"));
-    const response = await axios.post(
-      `${BASE_URL}/${discussionId}/comment`,
-      { text: newComment },
-      {
-        headers: {
-          Authorization: `Bearer ${token.accessToken}`,
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    await axios.post(`${BASE_URL}/${discussionId}/comment`, {
+      comment_content: newComment,
+    });
 
-    const createdCommentFromAPI = response.data;
-
-    setForumData((prevData) => ({
-      data: Array.isArray(prevData?.data)
-        ? {
-            data: prevData.data.map((discussion) => {
-              if (discussion.id === discussionId) {
-                return {
-                  ...discussion,
-                  comments: [...discussion.comments, createdCommentFromAPI],
-                };
-              } else {
-                return discussion;
-              }
-            }),
-          }
-        : { data: [] },
-    }));
+    const forumResponse = await fetchForum();
+    setForumData(forumResponse);
   } catch (error) {
     console.error("Failed to post comment:", error.message);
   }
 };
+

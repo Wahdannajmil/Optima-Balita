@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { FaArrowRight } from "react-icons/fa";
-
 const About = () => {
   useEffect(() => {
     AOS.init({
@@ -22,8 +21,9 @@ const About = () => {
             <div className="md:w-1/2 mb-4 md:mb-0">
               <img
                 src="https://i.postimg.cc/66HgKtmK/tentang-kami.jpg"
-                className="w-3/4 md:w-100 rounded-lg md:justify-center mx-auto hover:shadow-lg transition-shadow"
+                className="w-3/4 md:w-100 rounded-lg md:justify-center mx-auto hover:shadow-lg transition-shadow animate-bounce-smooth"
                 alt="about image"
+                data-aos="fade-up"
               />
             </div>
             <div className="md:w-1/2 p-4">

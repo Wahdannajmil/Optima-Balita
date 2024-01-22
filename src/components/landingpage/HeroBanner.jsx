@@ -1,24 +1,32 @@
 import { NavLink } from "react-router-dom";
-import { FaBook, FaCalculator, FaComments } from "react-icons/fa";
+import { useSpring, animated } from "react-spring";
 import BgHero from "../../assets/img/bg_hero.jpg";
+import { FaBook, FaCalculator, FaComments } from "react-icons/fa";
 
 const HeroBanner = () => {
+  const props = useSpring({
+    from: { opacity: 0, transform: "translateX(100%)" },
+    to: { opacity: 1, transform: "translateX(0%)" },
+    config: { tension: 140, friction: 10 },
+  });
+
   return (
     <>
       <main>
         <div className="pt-40 pb-60 flex content-center items-center justify-center">
           <div
             className="absolute top-0 w-full h-full bg-center bg-cover"
-            style={{
-              backgroundImage: `url(${BgHero})`,
-            }}
+            style={{ backgroundImage: `url(${BgHero})` }}
           >
             <span
               id="blackOverlay"
               className="w-full h-full absolute opacity-60 bg-black"
             ></span>
           </div>
-          <div className="container relative ml-10 mr-10">
+          <animated.div
+            style={props}
+            className="container relative ml-10 mr-10"
+          >
             <div className="items-center flex">
               <div className="w-full lg:w-6/12 px-4">
                 <h1 className="text-white font-bold text-3xl md:text-5xl">
@@ -30,7 +38,7 @@ const HeroBanner = () => {
                 </p>
                 <div className="mt-8">
                   <NavLink
-                    to="/login"
+                    to="/forum"
                     className="py-3 px-7 font-medium rounded-full text-md bg-gradient-to-r from-teal-600 to-teal-400 text-white hover:bg-teal-500"
                   >
                     Get Started
@@ -38,7 +46,7 @@ const HeroBanner = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </animated.div>
         </div>
       </main>
       <div className="features flex flex-wrap md:mx-10">

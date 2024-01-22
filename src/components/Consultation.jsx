@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import { FaWhatsapp, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaWhatsapp } from "react-icons/fa";
-import "../styles/ConsultantDetails.css";
 
 const ConsultantDetails = () => {
   const [consultationData, setConsultationData] = useState(null);
@@ -28,6 +30,53 @@ const ConsultantDetails = () => {
       message,
     )}`;
     window.location.href = whatsappLink;
+  };
+
+  const CustomArrow = ({ className, onClick, icon }) => (
+    <div className={`${className} arrow`} onClick={onClick}>
+      {icon}
+    </div>
+  );
+
+  const NextArrow = (props) => (
+    <CustomArrow {...props} icon={<FaChevronRight />} />
+  );
+
+  const PrevArrow = (props) => (
+    <CustomArrow {...props} icon={<FaChevronLeft />} />
+  );
+
+  const sliderSettings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 2,
+    slidesToScroll: 1,
+    nextArrow: <NextArrow />,
+    prevArrow: <PrevArrow />,
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 768,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+        },
+      },
+    ],
   };
 
   useEffect(() => {
@@ -70,74 +119,56 @@ const ConsultantDetails = () => {
           Silahkan melakukan konsultasi melalui WhatsApp
         </h2>
       </div>
-      <div className="container px-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {loading && <p>Loading...</p>}
-        {consultationData &&
-          consultationData.map((consultant) => (
-            <div
-              key={consultant.id}
-              className={`consultant-card bg-gray-100 p-6 rounded-lg shadow-md transition duration-300 transform hover:scale-105 ${
-                hoveredCard === consultant.id ? "hovered" : ""
-              }`}
-              onMouseEnter={() => setHoveredCard(consultant.id)}
-              onMouseLeave={() => setHoveredCard(null)}
-            >
-              <div className="text-center">
-                <img
-                  src={consultant.consultant_profile}
-                  alt={consultant.consultant_username}
-                  className="w-32 h-32 mx-auto mb-4 rounded-full"
-                />
-                <h1 className="text-xl font-semibold mb-2">
-                  {consultant.consultant_username}
-                </h1>
-                <p className="text-gray-800 text-sm">
-                  {consultant.consultant_description}
-                </p>
-              </div>
-              {hoveredCard === consultant.id && ( // Show the form only when the card is hovered
-                <div className="mt-6 form-container">
-                  <div className="mt-4">
-                    <input
-                      type="text"
-                      placeholder="Nama Balita"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-gray-300 rounded"
+      <div className=" py-16 lg:grid-cols-3 xl:grid-cols-4 sm:px-24">
+        <Slider {...sliderSettings} className="mx-auto max-w-2xl">
+          {loading && <p>Loading...</p>}
+          {consultationData &&
+            consultationData.map((consultant) => (
+              <div
+                key={consultant.id}
+                className={`consultant-card bg-white p-6 rounded-lg shadow-md transition duration-300 transform hover:scale-105 ${
+                  hoveredCard === consultant.id ? "hovered" : ""
+                }`}
+                onMouseEnter={() => setHoveredCard(consultant.id)}
+                onMouseLeave={() => setHoveredCard(null)}
+              >
+                <div className="max-w-md bg-white p-8 rounded-lg shadow-lg">
+                  <div className="text-center">
+                    <img
+                      src={consultant.consultant_profile}
+                      alt={consultant.consultant_username}
+                      className="w-32 h-32 mx-auto mb-4 rounded-full"
                     />
+                    <h1 className="text-xl font-semibold mb-2">
+                      {consultant.consultant_username}
+                    </h1>
+                    <p className="text-gray-800 text-sm">
+                      {consultant.consultant_description}
+                    </p>
                   </div>
-                  <div className="mt-2">
-                    <input
-                      type="text"
-                      placeholder="Alamat"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-gray-300 rounded"
-                    />
+                  <div className="mt-6">
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-green-400 text-white rounded-full flex items-center justify-center">
+                        <FaWhatsapp size={32} />{" "}
+                      </div>
+                      <div className="ml-4">
+                        <h2 className="text-xl font-semibold">
+                          Hubungi Sekarang
+                        </h2>
+                        <p className="text-gray-500">Melalui WhatsApp</p>
+                      </div>
+                    </div>
+                    <a
+                      href={`https://wa.me/${consultant.consultant_phone}`}
+                      className="block bg-teal-500 text-white text-center mt-6 py-2 rounded-lg hover:bg-teal-700 transition duration-300"
+                    >
+                      Chat via WhatsApp
+                    </a>
                   </div>
-                  <div className="mt-2">
-                    <input
-                      type="text"
-                      placeholder="Keluhan"
-                      name="complaint"
-                      value={formData.complaint}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-gray-300 rounded"
-                    />
-                  </div>
-                  <button
-                    onClick={() => handleSubmit(consultant.consultant_phone)}
-                    className="block bg-teal-500 text-white text-center mt-4 py-2 rounded-lg hover:bg-teal-700 transition duration-300"
-                  >
-                    <FaWhatsapp className="mr-2" />
-                    Chat via WhatsApp
-                  </button>
                 </div>
-              )}
-            </div>
-          ))}
+              </div>
+            ))}
+        </Slider>
       </div>
     </div>
   );

@@ -30,7 +30,6 @@ const RegisterForm = () => {
       const success = await register(username, email, password);
 
       if (success) {
-        // Redirect to login page
         Swal.fire({
           icon: "success",
           title: "Akun Berhasil Dibuat",
@@ -40,18 +39,26 @@ const RegisterForm = () => {
         });
         console.log("Registration successful");
       } else {
-        setErrorMessage("Gagal mendaftar. Coba lagi nanti.");
-        console.log("Registration failed");
+        setErrorMessage("Terjadi kesalahan. Coba lagi nanti.");
       }
     } catch (error) {
       if (error.message) {
-        setErrorMessage(error.message);
+        console.log(error.message);
+        if (error.message.includes("password")) {
+          setErrorMessage("Password anda kurang kuat.");
+        } else if (error.message.includes("email")) {
+          setErrorMessage("Email tidak valid.");
+        } else if (error.message.includes("Email")) {
+          setErrorMessage("Email sudah terdaftar.");
+        } else {
+          setErrorMessage(error.message);
+        }
       } else if (
         error.response &&
         error.response.data &&
         error.response.data.message
       ) {
-        setErrorMessage(error.response.data.message);
+        setErrorMessage("error");
       } else {
         setErrorMessage("Terjadi kesalahan. Coba lagi nanti.");
       }
@@ -60,7 +67,6 @@ const RegisterForm = () => {
       setLoading(false);
     }
   };
-
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
